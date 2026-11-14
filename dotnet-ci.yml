@@ -1,0 +1,28 @@
+name: RaceDay .NET CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore
+        run: dotnet restore RaceDay.sln
+      - name: Build solution
+        run: dotnet build RaceDay.sln --configuration Release --no-restore
+      - name: Build MVC project
+        run: dotnet build RaceDay.Mvc/RaceDay.Mvc.csproj --configuration Release --no-restore
+      - name: Run tests
+        run: dotnet test RaceDay.Tests/RaceDay.Tests.csproj --configuration Release --no-build
+      - name: Build API image
+        run: docker build -f RaceDay.Api/Dockerfile -t raceday-api:ci .
+      - name: Build MVC image
+        run: docker build -f RaceDay.Mvc/Dockerfile -t racedday-web:ci .
