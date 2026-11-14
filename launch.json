@@ -1,0 +1,45 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "RaceDay API",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${env:ProgramFiles}/dotnet/dotnet.exe",
+      "args": ["run", "--project", "${workspaceFolder}/RaceDay.Api/RaceDay.Api.csproj", "--no-launch-profile"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5184"
+      },
+      "preLaunchTask": "database-update",
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Now listening on: (https?://\\S+)"
+      }
+    },
+    {
+      "name": "RaceDay MVC",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${env:ProgramFiles}/dotnet/dotnet.exe",
+      "args": ["run", "--project", "${workspaceFolder}/RaceDay.Mvc/RaceDay.Mvc.csproj", "--no-launch-profile"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5284"
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Now listening on: (https?://\\S+)"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "RaceDay API + MVC",
+      "configurations": ["RaceDay API", "RaceDay MVC"],
+      "stopAll": true
+    }
+  ]
+}

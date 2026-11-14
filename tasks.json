@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "localdb-start",
+      "type": "process",
+      "command": "C:\\Program Files\\Microsoft SQL Server\\170\\Tools\\Binn\\SqlLocalDB.exe",
+      "args": ["start", "MSSQLLocalDB"],
+      "problemMatcher": []
+    },
+    {
+      "label": "restore-tools",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["tool", "restore"],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "database-update",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["ef", "database", "update", "--project", "RaceDay.Api\\RaceDay.Api.csproj"],
+      "dependsOn": ["localdb-start", "restore-tools"],
+      "dependsOrder": "sequence",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "RaceDay.sln"],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
