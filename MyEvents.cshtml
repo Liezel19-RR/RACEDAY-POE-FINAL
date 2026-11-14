@@ -1,0 +1,4 @@
+@model List<EnrolmentVm>
+<h1>My events</h1><div class="table-wrap"><table><thead><tr><th>Event</th><th>Date</th><th>Category</th><th>Status</th><th></th></tr></thead><tbody>
+@foreach (var item in Model) { <tr><td>@item.Event</td><td>@DisplayFormatters.Date(item.EventDate)</td><td>@item.Category</td><td><partial name="_Status" model="item.Status" /></td><td>@if (item.Status != "Cancelled" && string.IsNullOrEmpty(item.ResultStatus)) { <form method="post" asp-action="Cancel" asp-route-id="@item.Id"><button class="danger">Cancel entry</button></form> }</td></tr> }
+</tbody></table></div>

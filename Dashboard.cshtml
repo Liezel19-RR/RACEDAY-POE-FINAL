@@ -1,0 +1,19 @@
+@model List<EventVm>
+<h1>Organiser dashboard</h1><p>Manage your events, categories, enrolments, and results.</p>
+<a class="btn" asp-controller="Events" asp-action="Create">Create event</a>
+<div class="cards">
+@foreach (var item in Model)
+{
+    <article class="event">
+        <partial name="_Banner" model="item.BannerImageUrl" />
+        <span class="tag">@item.EventType</span><h2>@item.Name</h2><p>@DisplayFormatters.Date(item.Date) · @item.Location</p>
+        <a asp-controller="Events" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+        <a asp-action="Categories" asp-route-eventId="@item.Id">Categories</a>
+        <a asp-action="Enrolments" asp-route-id="@item.Id">Enrolments and results</a>
+        <form method="post" asp-controller="Events" asp-action="UploadBanner" asp-route-id="@item.Id" enctype="multipart/form-data">
+            <label>Banner image</label><input name="file" type="file" accept=".jpg,.jpeg,.png,.webp,.gif" data-image-preview /><img class="preview" alt="Image preview" hidden /><button class="btn">Upload banner</button>
+        </form>
+        <form method="post" asp-controller="Events" asp-action="Delete" asp-route-id="@item.Id"><button class="danger" data-confirm="Delete this event?">Delete event</button></form>
+    </article>
+}
+</div>

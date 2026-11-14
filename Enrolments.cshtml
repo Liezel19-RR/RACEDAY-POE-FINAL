@@ -1,0 +1,20 @@
+@model List<EnrolmentVm>
+<h1>Event enrolments</h1><p>Review participant entries and record results.</p>
+<div class="table-wrap"><table><thead><tr><th>Participant</th><th>Email</th><th>Category</th><th>Status</th><th>Result</th></tr></thead><tbody>
+@foreach (var row in Model)
+{
+    <tr><td>@row.Participant</td><td>@row.Email</td><td>@row.Category</td><td><partial name="_Status" model="row.Status" /></td>
+    <td>
+        @if (string.IsNullOrEmpty(row.ResultStatus))
+        {
+            <form method="post" asp-action="RecordResult">
+                <input type="hidden" name="eventId" value="@ViewBag.EventId" /><input type="hidden" name="EnrolmentId" value="@row.Id" />
+                <label>Time</label><input name="FinishTime" type="time" step="1" required />
+                <label>Position</label><input name="FinishingPosition" type="number" min="1" value="1" required />
+                <select name="Status"><option>Finished</option><option>DNF</option><option>DQ</option></select><button class="btn">Record</button>
+            </form>
+        }
+        else { <span>@row.ResultStatus</span> }
+    </td></tr>
+}
+</tbody></table></div>

@@ -1,0 +1,7 @@
+@model EventVm
+<article class="event">
+    <partial name="_Banner" model="Model.BannerImageUrl" />
+    <span class="tag">@Model.EventType</span><h2>@Model.Name</h2>
+    <p>@DisplayFormatters.Date(Model.Date) · @Model.Location</p><p>@DisplayFormatters.Distance(Model.DistanceKm)</p>
+    <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.Id">View event</a>
+</article>

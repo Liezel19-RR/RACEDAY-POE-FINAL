@@ -1,0 +1,4 @@
+@model List<ResultVm>
+<h1>My race results</h1><div class="table-wrap"><table><thead><tr><th>Event</th><th>Date</th><th>Category</th><th>Status</th><th>Time</th><th>Position</th></tr></thead><tbody>
+@foreach (var result in Model) { <tr><td>@result.Event</td><td>@DisplayFormatters.Date(result.Date)</td><td>@result.Category</td><td><partial name="_Status" model="result.Status" /></td><td>@result.FinishTime</td><td>@result.PositionDisplay</td></tr> }
+</tbody></table></div>

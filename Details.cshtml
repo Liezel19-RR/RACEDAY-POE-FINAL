@@ -1,0 +1,26 @@
+@model EventVm
+<partial name="_Banner" model="Model.BannerImageUrl" />
+<span class="tag">@Model.EventType</span><h1>@Model.Name</h1><p>@Model.Description</p>
+<p><b>Date:</b> @DisplayFormatters.Date(Model.Date) · <b>Location:</b> @Model.Location · <b>Distance:</b> @DisplayFormatters.Distance(Model.DistanceKm)</p>
+<h2>Categories</h2>
+@foreach (var category in Model.Categories ?? [])
+{
+    <article class="event">
+        <h3>@category.Name</h3><p>@category.Description</p>
+        <p>@DisplayFormatters.Distance(category.DistanceKm) · @DisplayFormatters.Price(category.Price)
+            @if (category.Capacity.HasValue) { <span>· @category.EnrolledCount / @category.Capacity entries</span> }</p>
+        @if (Context.Session.GetString(SessionKeys.Role) == "Participant")
+        {
+            <form method="post" asp-action="Enrol"><input type="hidden" name="eventId" value="@Model.Id" /><input type="hidden" name="categoryId" value="@category.Id" /><button class="btn">Enter this category</button></form>
+        }
+        <h2>Leaderboard</h2>
+        @if (((List<LeaderboardVm>)ViewBag.Leaderboard).Count == 0) { <p>No results have been recorded yet.</p> }
+        else
+        {
+            <div class="table-wrap"><table><thead><tr><th>Position</th><th>Participant</th><th>Category</th><th>Time</th><th>Status</th></tr></thead><tbody>
+            @foreach (var result in (List<LeaderboardVm>)ViewBag.Leaderboard)
+            { <tr><td>@result.FinishingPosition</td><td>@result.Participant</td><td>@result.Category</td><td>@result.FinishTime</td><td><partial name="_Status" model="result.Status" /></td></tr> }
+            </tbody></table></div>
+        }
+    </article>
+}
