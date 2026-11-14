@@ -1,56 +1,29 @@
-using Microsoft.EntityFrameworkCore;
-using RaceDay.Api.Data;
-using RaceDay.Api.Security;
-using RaceDay.Api.Services;
+using System.Globalization;
+using Microsoft.AspNetCore.Mvc;
+using RaceDay.Mvc.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<RaceDayDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("RaceDay")
-        ?? "Server=(localdb)\\MSSQLLocalDB;Database=RaceDayDb;Trusted_Connection=True;TrustServerCertificate=True;",
-        sql => sql.EnableRetryOnFailure()));
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+builder.Services.AddControllersWithViews(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-});
-builder.Services.AddSingleton<IBlobStorageService, BlobStorageService>();
-
+builder.Services.AddSession(o => { o.Cookie.HttpOnly = true; o.Cookie.IsEssential = true; o.IdleTimeout = TimeSpan.FromMinutes(30); });
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient<ApiClient>(c => c.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5184/"))
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false });
 var app = builder.Build();
-
-app.UseSwagger();
-app.UseSwaggerUI();
-
-if (app.Configuration.GetValue<bool>("Database:InitializeOnStartup"))
+app.UseExceptionHandler("/Home/Error");
+if (!app.Environment.IsDevelopment()) app.UseHsts();
+app.UseHttpsRedirection(); app.UseStaticFiles(); app.UseRouting(); app.UseSession();
+app.Use(async (context, next) =>
 {
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<RaceDayDbContext>();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    var retries = app.Configuration.GetValue("Database:StartupRetries", 10);
-    for (var attempt = 1; ; attempt++)
+    try { await next(); }
+    catch (ApiSessionExpiredException)
     {
-        try
-        {
-            if (db.Database.GetMigrations().Any()) await db.Database.MigrateAsync();
-            else await db.Database.EnsureCreatedAsync();
-            break;
-        }
-        catch (Exception ex) when (attempt < retries)
-        {
-            logger.LogWarning(ex, "Database initialization attempt {Attempt} failed.", attempt);
-            await Task.Delay(TimeSpan.FromSeconds(Math.Min(attempt * 2, 15)));
-        }
+        context.Session.Clear();
+        context.Response.Redirect("/Account/Login");
     }
-}
-
-app.UseSession();
-app.MapControllers();
-
+});
+app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
+app.MapControllerRoute(name:"default", pattern:"{controller=Home}/{action=Index}/{id?}");
 app.Run();
-
-public partial class Program { }
